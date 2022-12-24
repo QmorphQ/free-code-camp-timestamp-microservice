@@ -12,16 +12,22 @@ app.use(cors({ optionsSuccessStatus: 200 })); // some legacy browsers choke on 2
 
 // http://expressjs.com/en/starter/static-files.html
 app.use(express.static("public"));
-app.use("/api/:date", (req, res, next) => {
-  console.log({date: req.params.date});
+app.get("/api", (req, res, next) => {
+  let date = new Date();
+  res.json({ unix: Date.parse(date), utc: date.toUTCString() });
+  next();
+});
+app.get("/api/:date", (req, res, next) => {
+  let param = req.params.date;
+  let isDateIntegerNum = Number.isInteger(+param);
   try {
-    let date = new Date(req.params.date);
-    if(date.toString() === 'Invalid Date') {
-      throw err
+    let date = new Date(isDateIntegerNum === true ? +param : param);
+    if (date.toString() === "Invalid Date") {
+      throw err;
     }
-    res.json({unix: Date.parse(date), utc: date.toUTCString()});
-  } catch(err) {
-    res.json({error: 'Invalid Date'});
+    res.json({ unix: Date.parse(date), utc: date.toUTCString() });
+  } catch (err) {
+    res.json({ error: "Invalid Date" });
   }
   next();
 });
